@@ -121,7 +121,7 @@
     @apply font-light tracking-wide;
   }
   
-  .font-medium {
+  .text-medium {
     @apply font-medium;
   }
 }
