@@ -24,12 +24,27 @@ const Index: React.FC = () => {
         }
       });
     });
+    
+    // Setup parallax scroll effect
+    const handleParallaxScroll = () => {
+      const scrollY = window.scrollY;
+      const parallaxElements = document.querySelectorAll('.parallax-element');
+      
+      parallaxElements.forEach((element) => {
+        const speed = (element as HTMLElement).dataset.speed || '0.1';
+        const yPos = -(scrollY * parseFloat(speed));
+        (element as HTMLElement).style.transform = `translate3d(0, ${yPos}px, 0)`;
+      });
+    };
+    
+    window.addEventListener('scroll', handleParallaxScroll);
 
     // Clean up event listeners
     return () => {
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.removeEventListener('click', function() {});
       });
+      window.removeEventListener('scroll', handleParallaxScroll);
     };
   }, []);
 
