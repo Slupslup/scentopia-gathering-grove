@@ -68,16 +68,12 @@ export default {
 					200: "#E0F0D0",
 					300: "#C2E0A8",
 					400: "#A4D080",
-					500: "#8BBF5E",
-					600: "#74A84D", // Added darker shades
-					700: "#5E8C3F",
-					800: "#496F31"
+					500: "#8BBF5E"
 				},
 				cream: {
 					100: "#FEF7CD",
 					200: "#FDF2B0",
-					300: "#FCE680",
-					400: "#FBD951" // Added darker shade
+					300: "#FCE680"
 				},
 				stone: {
 					100: "#F5F5F5",
@@ -89,14 +85,6 @@ export default {
 					700: "#404040",
 					800: "#262626",
 					900: "#171717",
-					950: "#0A0A0A", // Added darker shade
-				},
-				dark: {
-					100: "#202124", // Dark surface
-					200: "#1C1D21", // Darker surface
-					300: "#18191D", // Card background
-					400: "#111215", // Background
-					500: "#0A0B0E"  // Darkest shade
 				}
 			},
 			borderRadius: {
@@ -170,18 +158,6 @@ export default {
 				"ripple": {
 					"0%": { transform: "scale(0)", opacity: "1" },
 					"100%": { transform: "scale(6)", opacity: "0" }
-				},
-				"parallax-slow": {
-					"0%": { transform: "translateY(0)" },
-					"100%": { transform: "translateY(-20px)" }
-				},
-				"parallax-medium": {
-					"0%": { transform: "translateY(0)" },
-					"100%": { transform: "translateY(-40px)" }
-				},
-				"parallax-fast": {
-					"0%": { transform: "translateY(0)" },
-					"100%": { transform: "translateY(-60px)" }
 				}
 			},
 			animation: {
@@ -198,10 +174,7 @@ export default {
 				"pulse-gentle": "pulse-gentle 4s ease-in-out infinite",
 				"ripple": "ripple 3s linear infinite",
 				"enter": "fade-in 0.6s ease-out, scale-in 0.5s ease-out",
-				"exit": "fade-out 0.6s ease-out, scale-out 0.5s ease-out",
-				"parallax-slow": "parallax-slow 1s ease-out forwards",
-				"parallax-medium": "parallax-medium 1s ease-out forwards",
-				"parallax-fast": "parallax-fast 1s ease-out forwards"
+				"exit": "fade-out 0.6s ease-out, scale-out 0.5s ease-out"
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
