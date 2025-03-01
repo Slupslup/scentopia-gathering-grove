@@ -1,10 +1,10 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 const ThreeScene: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
   
   useEffect(() => {
     if (!mountRef.current) return;
@@ -33,7 +33,6 @@ const ThreeScene: React.FC = () => {
     const baseGeometry = new THREE.CylinderGeometry(2, 2.2, 0.5, 32);
     const baseMaterial = new THREE.MeshStandardMaterial({
       color: 0x5a6b59,
-      // For MeshStandardMaterial, these properties are valid
       metalness: 0.2,
       roughness: 0.8
     });
@@ -47,7 +46,6 @@ const ThreeScene: React.FC = () => {
     const columnGeometry = new THREE.CylinderGeometry(1.5, 1.5, 15, 32);
     const columnMaterial = new THREE.MeshStandardMaterial({
       color: 0xdedede,
-      // For MeshStandardMaterial, these properties are valid
       metalness: 0.3,
       roughness: 0.5
     });
@@ -144,26 +142,110 @@ const ThreeScene: React.FC = () => {
       }
     }
 
-    // Add some scent particles
-    const particles: THREE.Mesh[] = [];
-    const particleCount = 10;
-    const particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-    const particleMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.6
-    });
+    // Enhanced scent particles system
+    const particleCount = 50;
+    const particles: THREE.Points[] = [];
+    const particleGroups: {
+      particles: THREE.Points,
+      velocity: THREE.Vector3[],
+      lifespan: number[],
+      maxLifespan: number
+    }[] = [];
 
-    for (let i = 0; i < particleCount; i++) {
-      const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-      const theta = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 2 + 2;
-      particle.position.x = radius * Math.cos(theta);
-      particle.position.y = topY + Math.random() * 3;
-      particle.position.z = radius * Math.sin(theta);
-      particle.visible = false; // Initially invisible
-      scene.add(particle);
-      particles.push(particle);
+    // Create multiple particle emitters around the top sphere
+    const emitterCount = 4;
+    for (let e = 0; e < emitterCount; e++) {
+      const particleGeometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const sizes = new Float32Array(particleCount);
+      const colors = new Float32Array(particleCount * 3);
+      
+      const emitterAngle = (e / emitterCount) * Math.PI * 2;
+      const emitterX = Math.cos(emitterAngle) * 1.8;
+      const emitterZ = Math.sin(emitterAngle) * 1.8;
+      const emitterY = topY;
+
+      const velocity: THREE.Vector3[] = [];
+      const lifespan: number[] = [];
+      const maxLifespan = 2.0; // seconds
+      
+      // Initialize particles
+      for (let i = 0; i < particleCount; i++) {
+        // Initial position at the emitter
+        positions[i * 3] = emitterX;
+        positions[i * 3 + 1] = emitterY;
+        positions[i * 3 + 2] = emitterZ;
+        
+        // Random size variation
+        sizes[i] = Math.random() * 0.1 + 0.05;
+        
+        // Soft gradient colors (white -> light green -> transparent)
+        colors[i * 3] = 0.9; // R
+        colors[i * 3 + 1] = 1.0; // G
+        colors[i * 3 + 2] = 0.9; // B
+        
+        // Random velocity in a cone shape upward and outward
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 0.5 + 0.5;
+        velocity.push(new THREE.Vector3(
+          Math.cos(angle) * speed * 0.5,
+          Math.random() * speed + 1.0, // Mostly upward
+          Math.sin(angle) * speed * 0.5
+        ));
+        
+        // Random lifespan for staggered emission
+        lifespan.push(Math.random() * maxLifespan);
+      }
+
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+      particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const particleMaterial = new THREE.PointsMaterial({
+        size: 0.2,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.6,
+        map: createParticleTexture(),
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+      particleSystem.visible = false; // Initially invisible
+      scene.add(particleSystem);
+      
+      particles.push(particleSystem);
+      particleGroups.push({
+        particles: particleSystem,
+        velocity,
+        lifespan,
+        maxLifespan
+      });
+    }
+
+    // Create a custom texture for particles
+    function createParticleTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      
+      const context = canvas.getContext('2d');
+      if (!context) return null;
+      
+      // Create a radial gradient for a soft, glowing particle
+      const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(0.3, 'rgba(200, 255, 220, 0.8)');
+      gradient.addColorStop(0.8, 'rgba(180, 255, 200, 0.2)');
+      gradient.addColorStop(1, 'rgba(150, 255, 180, 0)');
+      
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 64, 64);
+      
+      const texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+      return texture;
     }
 
     // Lighting
@@ -177,20 +259,87 @@ const ThreeScene: React.FC = () => {
     directionalLight.shadow.mapSize.height = 2048;
     scene.add(directionalLight);
 
-    // Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableZoom = false;
-    controls.enablePan = false;
-    controls.rotateSpeed = 0.5;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 1;
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    // Soft spotlight effect
+    const spotLight = new THREE.SpotLight(0xb6c8a0, 0.8, 30, Math.PI / 4, 0.3, 1);
+    spotLight.position.set(0, 15, 0);
+    spotLight.target.position.set(0, 0, 0);
+    scene.add(spotLight);
+    scene.add(spotLight.target);
+
+    // Controls setup (manual rotation instead of OrbitControls)
+    let rotationSpeed = 0.002;
+    let autoRotate = true;
+    let targetRotationY = 0;
+    let currentRotationY = 0;
+    const damping = 0.05;
+    
+    // Mouse interaction
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    
+    const handleMouseDown = (e: MouseEvent) => {
+      isDragging = true;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+      autoRotate = false;
+    };
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const deltaMove = { x: e.clientX - previousMousePosition.x, y: e.clientY - previousMousePosition.y };
+        targetRotationY += deltaMove.x * 0.01;
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+      }
+    };
+    
+    const handleMouseUp = () => {
+      isDragging = false;
+      setTimeout(() => {
+        if (!isDragging) autoRotate = true;
+      }, 2000);
+    };
+
+    const handleMouseEnter = () => {
+      setIsHovering(true);
+      particleGroups.forEach(group => {
+        group.particles.visible = true;
+      });
+    };
+    
+    const handleMouseLeave = () => {
+      setIsHovering(false);
+      setTimeout(() => {
+        if (!isHovering) {
+          particleGroups.forEach(group => {
+            group.particles.visible = false;
+          });
+        }
+      }, 1000); // Fade out particles gradually
+    };
+    
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    mountRef.current.addEventListener('mouseenter', handleMouseEnter);
+    mountRef.current.addEventListener('mouseleave', handleMouseLeave);
 
     // Animation
-    let particleTimer = 0;
+    const clock = new THREE.Clock();
+    
     const animate = () => {
       requestAnimationFrame(animate);
+      
+      const delta = clock.getDelta();
+      
+      // Smooth rotation with damping
+      if (autoRotate) {
+        targetRotationY += rotationSpeed;
+      }
+      
+      // Apply damping for smooth rotation
+      currentRotationY += (targetRotationY - currentRotationY) * damping;
+      
+      // Apply rotation to entire scene
+      scene.rotation.y = currentRotationY;
       
       // Animate leaves slightly
       const time = Date.now() * 0.001;
@@ -199,38 +348,43 @@ const ThreeScene: React.FC = () => {
         leaf.rotation.y += Math.cos(time * 0.2 + index) * 0.001;
       });
 
-      // Periodic scent emission animation
-      particleTimer += 0.01;
-      if (particleTimer > 2 * Math.PI) particleTimer = 0;
-      
-      particles.forEach((particle, index) => {
-        const offset = (index / particles.length) * 2 * Math.PI;
-        const visibleThreshold = Math.sin(particleTimer + offset);
-        
-        if (visibleThreshold > 0.7) {
-          if (!particle.visible) particle.visible = true;
+      // Update particles when visible
+      particleGroups.forEach(group => {
+        if (group.particles.visible) {
+          const positions = (group.particles.geometry.attributes.position as THREE.BufferAttribute).array;
+          const colors = (group.particles.geometry.attributes.color as THREE.BufferAttribute).array;
           
-          // Move upward when visible
-          particle.position.y += 0.03;
-          
-          // Fade out as it goes up
-          if (particle.material) {
-            (particle.material as THREE.MeshBasicMaterial).opacity = 0.6 * (1 - visibleThreshold / 3);
+          for (let i = 0; i < particleCount; i++) {
+            // Update lifespan
+            group.lifespan[i] += delta;
+            if (group.lifespan[i] > group.maxLifespan) {
+              group.lifespan[i] = 0;
+              
+              // Reset position to emitter
+              positions[i * 3] = group.particles.position.x;
+              positions[i * 3 + 1] = topY;
+              positions[i * 3 + 2] = group.particles.position.z;
+            } else {
+              // Update position based on velocity and lifespan
+              const lifeFactor = group.lifespan[i] / group.maxLifespan;
+              
+              // Apply velocity
+              positions[i * 3] += group.velocity[i].x * delta;
+              positions[i * 3 + 1] += group.velocity[i].y * delta;
+              positions[i * 3 + 2] += group.velocity[i].z * delta;
+              
+              // Fade out color based on lifespan
+              colors[i * 3] = 0.9 * (1 - lifeFactor); // Red
+              colors[i * 3 + 1] = 1.0 * (1 - lifeFactor * 0.5); // Green fades slower
+              colors[i * 3 + 2] = 0.9 * (1 - lifeFactor); // Blue
+            }
           }
           
-          // Reset when it gets too high
-          if (particle.position.y > topY + 8) {
-            const theta = Math.random() * Math.PI * 2;
-            const radius = Math.random() * 2 + 2;
-            particle.position.x = radius * Math.cos(theta);
-            particle.position.y = topY + Math.random() * 1;
-            particle.position.z = radius * Math.sin(theta);
-            particle.visible = false;
-          }
+          group.particles.geometry.attributes.position.needsUpdate = true;
+          group.particles.geometry.attributes.color.needsUpdate = true;
         }
       });
       
-      controls.update();
       renderer.render(scene, camera);
     };
     animate();
@@ -247,23 +401,44 @@ const ThreeScene: React.FC = () => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      
       if (mountRef.current) {
+        mountRef.current.removeEventListener('mouseenter', handleMouseEnter);
+        mountRef.current.removeEventListener('mouseleave', handleMouseLeave);
         mountRef.current.removeChild(renderer.domElement);
       }
+      
       // Dispose materials and geometries
-      [baseGeometry, columnGeometry, topGeometry, particleGeometry].forEach(geometry => {
+      [baseGeometry, columnGeometry, topGeometry].forEach(geometry => {
         geometry.dispose();
       });
       
-      [baseMaterial, columnMaterial, topMaterial, particleMaterial].forEach(material => {
+      [baseMaterial, columnMaterial, topMaterial].forEach(material => {
         material.dispose();
+      });
+      
+      // Dispose particle systems
+      particles.forEach(p => {
+        p.geometry.dispose();
+        if (p.material instanceof THREE.Material) {
+          p.material.dispose();
+        }
       });
       
       scene.clear();
     };
-  }, []);
+  }, [isHovering]);
 
-  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <div 
+      ref={mountRef} 
+      className="relative w-full h-full cursor-pointer"
+      title="Hover to see scent diffusion"
+    />
+  );
 };
 
 export default ThreeScene;
