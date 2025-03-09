@@ -7,7 +7,7 @@ const features = [
   {
     icon: <Leaf className="h-6 w-6" />,
     title: "Natural Greenery",
-    description: "Lush cascading greenery flows from the top meter, creating a natural focal point that brings the outdoors in."
+    description: "Lush cascading greenery flows from the top, creating a natural focal point that brings the outdoors in."
   },
   {
     icon: <Droplets className="h-6 w-6" />,
@@ -17,7 +17,7 @@ const features = [
   {
     icon: <Trees className="h-6 w-6" />,
     title: "Versatile Design",
-    description: "The elegant design fits seamlessly into any venue, from grand ballrooms to intimate garden settings."
+    description: "The elegant bamboo base and fabric planters fit seamlessly into any venue, from grand ballrooms to intimate garden settings."
   },
   {
     icon: <Flower className="h-6 w-6" />,
@@ -33,7 +33,7 @@ const Features: React.FC = () => {
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="h2 mb-4">Sophisticated Features</h2>
           <p className="text-stone-600">
-            Our scent tower combines visual beauty with aromatic experience, designed to enhance any special occasion.
+            Our plant tower combines visual beauty with aromatic experience, designed to enhance any special occasion.
           </p>
         </div>
 
@@ -60,7 +60,7 @@ const Features: React.FC = () => {
             <div className="p-8 md:p-12 flex flex-col justify-center">
               <h3 className="h3 mb-4">Technical Specifications</h3>
               <p className="text-stone-600 mb-6">
-                Designed for both form and function, our scent tower offers impressive technical capabilities.
+                Designed for both form and function, our plant tower offers impressive technical capabilities.
               </p>
               
               <div className="space-y-4">
@@ -69,33 +69,33 @@ const Features: React.FC = () => {
                   <div>180 cm</div>
                 </div>
                 <div className="flex">
-                  <div className="w-32 font-medium">Greenery</div>
-                  <div>Top 100 cm</div>
+                  <div className="w-32 font-medium">Base</div>
+                  <div>Bamboo, 40 cm diameter</div>
+                </div>
+                <div className="flex">
+                  <div className="w-32 font-medium">Planters</div>
+                  <div>4 tiers of fabric pockets</div>
                 </div>
                 <div className="flex">
                   <div className="w-32 font-medium">Coverage</div>
                   <div>Up to 300m³ (approx. 200m²)</div>
                 </div>
                 <div className="flex">
-                  <div className="w-32 font-medium">Power</div>
-                  <div>Standard electrical outlet (120-240V)</div>
-                </div>
-                <div className="flex">
-                  <div className="w-32 font-medium">Noise Level</div>
-                  <div>Near silent operation &lt;20dB</div>
+                  <div className="w-32 font-medium">Plants</div>
+                  <div>Selection of aromatic herbs and trailing vines</div>
                 </div>
                 <div className="flex">
                   <div className="w-32 font-medium">Maintenance</div>
-                  <div>Low maintenance, easy refills</div>
+                  <div>Low maintenance, simple watering system</div>
                 </div>
               </div>
             </div>
             
             <div className="aspect-video lg:aspect-auto relative overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                alt="Natural setting" 
-                className="absolute inset-0 w-full h-full object-cover"
+                src="/lovable-uploads/6dc43b86-8650-4fd3-aecf-62287b5021d5.png" 
+                alt="Aromacade Plant Tower" 
+                className="absolute inset-0 w-full h-full object-contain"
               />
               <div className="absolute inset-0 bg-primary/10"></div>
             </div>

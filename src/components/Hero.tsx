@@ -107,10 +107,14 @@ const Hero: React.FC = () => {
           </div>
         </div>
         
-        <div className="parallax-element relative h-[500px] animate-fade-in animation-delay-300" data-speed="0.05">
+        <div className="parallax-element relative h-[600px] animate-fade-in animation-delay-300" data-speed="0.05">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-full max-w-md">
-              <ThreeScene />
+              <img 
+                src="/lovable-uploads/6dc43b86-8650-4fd3-aecf-62287b5021d5.png" 
+                alt="Aromacade Plant Tower" 
+                className="h-full w-auto mx-auto object-contain drop-shadow-xl"
+              />
             </div>
           </div>
           
